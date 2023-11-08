@@ -19,23 +19,18 @@ def index_folder(window, folder):
 
     records = []
     file_count = 0
-    for file in Path(folder).rglob("*"):
-        records.append((str(file.resolve()), file.name, file.stat().st_size, file.suffix))
-        file_count += 1
+    for file in folder.rglob("*"):
         window.write_event_value("indexer_msg", file_count)
-
-    db.executemany(
-        "INSERT OR IGNORE INTO FileIndex(absolute_path ,file_name, size_bytes, content_type) VALUES(?, ?, ?, ?)",
-        records,
-    )
-    db.commit()
-    db.close()
+        records.append((str(file.resolve()), file.name, file.stat().st_size, file.suffix))
+        file_count +=1
+    
+    with db:
+        db.executemany(f"INSERT OR IGNORE INTO {TABLE_NAME}(absolute_path, file_name, size_bytes, content_type) VALUES(?, ?, ?, ?)", records)
 
 def get_available_file_extensions(folder):
     db = connect_to_database(folder)
-    extensions = [ext[0] for ext in db.execute("SELECT distinct(content_type) from FileIndex")]
-    db.close()
-
+    with db:
+        extensions = [ext[0] for ext in db.execute("SELECT DISTINCT(content_type) FROM FileIndex")]
     extensions.append('Any')
     return extensions
 
@@ -45,19 +40,17 @@ def human_readable_filesize(size):
             return f"{size:.1f}{unit}B"
         size /= 1024.0
 
-
 def search_files(folder, name, file_ext=None):
     sql = "SELECT file_name, size_bytes FROM FileIndex WHERE file_name LIKE ?"
     query_params = ("%" + name + "%",)
+    
     if file_ext not in ["Any", None, ""]:
         sql += " AND content_type = ?"
         query_params += (file_ext,)
-    
+
     db = connect_to_database(folder)
-    files = []
-    for file in db.execute(sql, query_params):
-        files.append(f"{file[0]} - {human_readable_filesize(file[1])}")
-    db.close()
+    with db:
+        files = [f"{file[0]} - {human_readable_filesize(file[1])}" for file in db.execute(sql, query_params)]
     return files
 
 def main():
