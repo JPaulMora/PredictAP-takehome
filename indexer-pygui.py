@@ -16,7 +16,7 @@ layout = [
         sg.Button("Index this folder", key="index_btn", visible=False),
         sg.Button("Reindex this folder", key="reindex_btn", visible=False),
     ],
-    [sg.Text("", key="index_counter"), sg.Button("Test button", key="test_btn")],
+    [sg.Text("", key="index_counter"), sg.Text("Search by name and file extension...", key="search_instructions", visible=False)],
     [sg.Input("", key="search_input", visible=False), sg.Combo(['Any'], key="extension_combo", visible=False, size=10)],
     [sg.Listbox(values=[], key="file_list", size=(70, 6), visible=False,)],
     [sg.Button("Search", key="search_btn", visible=False)]
@@ -81,10 +81,12 @@ while True:
         folder = values["-FOLDER-"]
         if Path(folder + "/index.sqlite3").is_file():
             window["reindex_btn"].Update(visible=True)
+            window["search_instructions"].Update(visible=True)
             window["search_input"].Update(visible=True)
             window["extension_combo"].Update(visible=True, values=get_available_file_extensions(folder))
             window["file_list"].Update(visible=True)
             window["search_btn"].Update(visible=True)
+            
         else:
             window["index_btn"].Update(visible=True)
 
@@ -97,14 +99,12 @@ while True:
 
     if event == "search_btn":
         window["file_list"].Update(values=search_files(folder, values['search_input'], values['extension_combo']))
-    
-    if event == "test_btn":
-        pass
 
     elif event == "index_completed":
         sg.popup("Your folder has been indexed!")
         window["index_btn"].Update(disabled=False, visible=False)
         window["reindex_btn"].Update(disabled=False, visible=True)
+        window["search_instructions"].Update(visible=True)
 
         window["index_counter"].Update(visible=False)
         window["search_input"].Update(visible=True)

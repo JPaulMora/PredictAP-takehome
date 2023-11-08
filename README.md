@@ -2,18 +2,16 @@
 
 Challenge: A directory contains multiple files and directories of non-uniform file and directory names. Create a program that traverses a base directory and creates an index file that can be used to quickly lookup files by name, size, and content type.
 
-# Instructions
+# Usage
 
-Fork this repository and implement the above requirements. The result must be an application that implements both the index and search features. Use your best judgement as to the interface that is used to use the index and search features, but remember that this is meant to create a dialog during the interview process, not be something that would be used in production.
+To run this application you need to have python installed, the recommended way to install it is to create a virtual environment. Within your preferred environment you must install the dependencies and run the project. Below are specific instructions on how to do this.
 
-Feel free to use the language, libraries, and tools that you are most comfortable in and best reflect your ability to translate requirements into a functional implementation.
-
-Once the project is implemented, remove the `# Instructions` section of this readme and add the section `# Usage` with instructions on how to run the produced application.
-
-The `test_data` directory in this project contains files and directories that can be used to test your implementation.
-
-Good luck.
-
+```bash
+python -m venv venv # Create a virtual environment
+source venv/bin/activate # activate the virtual environment
+pip install -r requirements.txt # install requirements
+python indexer-pygui.py # run the program
+```
 
 # Documentation
 
@@ -38,3 +36,9 @@ Based on the previous section, the following design choices were made.
 * Python is the team's (me) main language so this should be the most efficient language to use.
 * For the user interface, something web based could be implemented, or a templating/scaffolding framework such as EasyQT could be used.
 * The file indexing process will be made sequentially at first, once it's working further optimizations could be made.
+
+## Further expansion
+
+* To scale this project, consider converting it to a web based project. Web servers are designed to handle multiple concurrent requests and users.
+* The limiting factor for performance is the selected indexing backend, SQLite will beat `fopen` but it will be slow at scale compared to MySQL or PostgreSQL.
+* The scaling answer _might not_ be SQL at all. There are many different indexing and searching backends such as Solr and Elasticsearch which will have better full text search implementations among other scaling benefits.
